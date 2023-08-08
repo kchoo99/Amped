@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CC136F2C2A82D5A800763CE1 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CC136F2B2A82D5A800763CE1 /* Launch Screen.storyboard */; };
 		CC97CD852A81F9C6008227D4 /* AmpedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC97CD842A81F9C6008227D4 /* AmpedApp.swift */; };
 		CC97CD872A81F9C6008227D4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC97CD862A81F9C6008227D4 /* ContentView.swift */; };
 		CC97CD892A81F9C7008227D4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CC97CD882A81F9C7008227D4 /* Assets.xcassets */; };
@@ -15,6 +16,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CC136F2B2A82D5A800763CE1 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		CC97CD812A81F9C6008227D4 /* Amped.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Amped.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC97CD842A81F9C6008227D4 /* AmpedApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmpedApp.swift; sourceTree = "<group>"; };
 		CC97CD862A81F9C6008227D4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -55,6 +57,7 @@
 			children = (
 				CC97CD842A81F9C6008227D4 /* AmpedApp.swift */,
 				CC97CD862A81F9C6008227D4 /* ContentView.swift */,
+				CC136F2B2A82D5A800763CE1 /* Launch Screen.storyboard */,
 				CC97CD882A81F9C7008227D4 /* Assets.xcassets */,
 				CC97CD922A820144008227D4 /* CitibikeAPIManager.swift */,
 				CC97CD8A2A81F9C7008227D4 /* Preview Content */,
@@ -128,6 +131,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC136F2C2A82D5A800763CE1 /* Launch Screen.storyboard in Resources */,
 				CC97CD8C2A81F9C7008227D4 /* Preview Assets.xcassets in Resources */,
 				CC97CD892A81F9C7008227D4 /* Assets.xcassets in Resources */,
 			);
@@ -281,6 +285,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen.storyboard";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -315,6 +320,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen.storyboard";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (

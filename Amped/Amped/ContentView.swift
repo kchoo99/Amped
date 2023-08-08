@@ -26,6 +26,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
 }
 
 struct ContentView: View {
+    @State private var initialRegionSet = false
     @StateObject private var locationManager = LocationManager()
     
     @State private var region = MKCoordinateRegion(
@@ -34,7 +35,7 @@ struct ContentView: View {
     )
     
     @State private var annotations: [StationAnnotation] = []
-    @State private var isLoading: Bool = false // Track API call status
+    @State private var isLoading: Bool = false
     
     var body: some View {
         ZStack {
@@ -49,23 +50,21 @@ struct ContentView: View {
             .onAppear(perform: loadData)
             .edgesIgnoringSafeArea(.all)
             
-            // Overlay a loading view
             if isLoading {
-                    Color.black.opacity(0.5)
-                        .edgesIgnoringSafeArea(.all)
-                        .allowsHitTesting(true) // This will capture all the taps
+                Color.black.opacity(0.5)
+                    .edgesIgnoringSafeArea(.all)
+                    .allowsHitTesting(true)
 
-                    VStack {
-                        ProgressView()
-                        Text("Loading...")
-                    }
-                    .padding()
-                    .background(Color.white.opacity(0.8))
-                    .cornerRadius(10)
+                VStack {
+                    ProgressView()
+                    Text("Loading...")
                 }
+                .padding()
+                .background(Color.white.opacity(0.8))
+                .cornerRadius(10)
+            }
             
             VStack {
-                
                 HStack {
                     // Refresh Button
                     Button(action: {
@@ -75,42 +74,74 @@ struct ContentView: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 30, height: 30)
-                            .foregroundColor(Color.black) // Making the button's color black
+                            .foregroundColor(Color.black)
                     }
-                    .frame(width: 50, height: 50) // Setting the frame size to 50x50
+                    .frame(width: 50, height: 50)
                     .background(
                         RoundedRectangle(cornerRadius: 10)
                             .fill(Color.white)
                     )
                     .padding(.leading, 16)
-                    .padding(.top, 16)
+//                    .padding(.top, 16)
                     
-                    Spacer()  // This pushes the button to the left
+                    Spacer() // This pushes the logo to the center
+
+//                    // Amped Logo
+//                    HStack(spacing: 8) {
+//                        Text("Amped")
+//                            .font(.largeTitle)
+//                            .bold()
+//                            .foregroundColor(Color(red: 38/255, green: 52/255, blue: 113/255))
+//
+//                        Image(systemName: "bolt.fill")
+//                            .font(.system(size: 30))
+//                            .foregroundColor(Color(red: 235/255, green: 31/255, blue: 42/255))
+//                    }
+//                    .padding(.vertical, 4)
+//                    .padding(.horizontal, 30)
+//                    .background(
+//                        RoundedRectangle(cornerRadius: 10)
+//                            .fill(Color.white.opacity(0.8))
+//                    )
+                    
+//                    Spacer() // Keeps empty space after the logo
+                    Image(systemName: "bolt.fill")
+                        .font(.system(size: 30))
+                        .foregroundColor(Color(red: 235/255, green: 31/255, blue: 42/255))
+                        .padding(.trailing, 16)
+                    
                 }
+                .padding(.top, 16)
+                
                 Spacer()
                 
-                VStack {
-                       HStack(spacing: 8) {
-                           Text("Amped")
-                               .font(.largeTitle)
-                               .bold()
-                               .foregroundColor(Color(red: 38/255, green: 52/255, blue: 113/255))
-                           
-                           Image(systemName: "bolt.fill")
-                               .font(.system(size: 30))
-                               .foregroundColor(Color(red: 235/255, green: 31/255, blue: 42/255))
-                       }
-                       .padding(.vertical, 4)
-                       .padding(.horizontal, 30)
-                       .background(
-                           RoundedRectangle(cornerRadius: 10)
-                               .fill(Color.white.opacity(0.95))
-                       )
-                       .padding(.top, 16)
-                       Spacer()
-                   }
-                
                 HStack {
+                    VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 8) {
+                                Circle()
+                                    .fill(Color.blue)
+                                    .frame(width: 20, height: 20)
+                                Text("E-bikes Only")
+                                    .font(.footnote)
+                                    .foregroundColor(Color.black)
+                            }
+                            HStack(spacing: 8) {
+                                Circle()
+                                    .fill(Color.red)
+                                    .frame(width: 20, height: 20)
+                                Text("Empty Only")
+                                    .font(.footnote)
+                                    .foregroundColor(Color.black)
+                            }
+                        }
+                    .padding(.vertical, 5)
+                    .padding(.horizontal, 5)
+                    .background(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .fill(Color.white.opacity(0.8))
+                                        )
+                        .padding(.leading, 16)
+                    
                     Spacer()
                     VStack(spacing: 16) {
                         Button(action: {
@@ -127,6 +158,7 @@ struct ContentView: View {
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 30, height: 30)
+                                    .foregroundColor(Color.black)
                             }
                         }
                         .buttonStyle(PlainButtonStyle())
@@ -141,30 +173,29 @@ struct ContentView: View {
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 30, height: 30)
+                                    .foregroundColor(Color.black)
                             }
                         }
                         .buttonStyle(PlainButtonStyle())
                         
                     }
-                    
                     .padding(.trailing, 16)
                 }
                 .padding(.bottom, 30)
             }
         }
         .onReceive(locationManager.$location) { location in
-            if let location = location {
+            if !initialRegionSet, let location = location {
                 updateRegion(to: location.coordinate)
+                initialRegionSet = true
             }
         }
     }
     
     func loadData() {
         isLoading = true
-        
         let api = CitibikeAPI()
         
-        // Implementing a timeout
         DispatchQueue.main.asyncAfter(deadline: .now() + 20) {
             isLoading = false
         }
@@ -187,7 +218,6 @@ struct ContentView: View {
         region.span = MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
     }
 }
-
 
 struct StationAnnotation: Identifiable {
     var id = UUID()
