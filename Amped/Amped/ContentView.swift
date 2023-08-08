@@ -51,21 +51,65 @@ struct ContentView: View {
             
             // Overlay a loading view
             if isLoading {
-                VStack {
-                    ProgressView()
-                    Text("Loading...")
+                    Color.black.opacity(0.5)
+                        .edgesIgnoringSafeArea(.all)
+                        .allowsHitTesting(true) // This will capture all the taps
+
+                    VStack {
+                        ProgressView()
+                        Text("Loading...")
+                    }
+                    .padding()
+                    .background(Color.white.opacity(0.8))
+                    .cornerRadius(10)
                 }
-                .padding()
-                .background(Color.white.opacity(0.8))
-                .cornerRadius(10)
-            }
             
             VStack {
-                Text("Amped")
-                    .font(.bold(.title)()) // Bold with title size
-                    .foregroundColor(Color("#263471"))
-                            .padding(.top, 16) // Add some padding from the top
+                
+                HStack {
+                    // Refresh Button
+                    Button(action: {
+                        loadData()
+                    }) {
+                        Image(systemName: "arrow.clockwise")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30, height: 30)
+                            .foregroundColor(Color.black) // Making the button's color black
+                    }
+                    .frame(width: 50, height: 50) // Setting the frame size to 50x50
+                    .background(
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(Color.white)
+                    )
+                    .padding(.leading, 16)
+                    .padding(.top, 16)
+                    
+                    Spacer()  // This pushes the button to the left
+                }
                 Spacer()
+                
+                VStack {
+                       HStack(spacing: 8) {
+                           Text("Amped")
+                               .font(.largeTitle)
+                               .bold()
+                               .foregroundColor(Color(red: 38/255, green: 52/255, blue: 113/255))
+                           
+                           Image(systemName: "bolt.fill")
+                               .font(.system(size: 30))
+                               .foregroundColor(Color(red: 235/255, green: 31/255, blue: 42/255))
+                       }
+                       .padding(.vertical, 4)
+                       .padding(.horizontal, 30)
+                       .background(
+                           RoundedRectangle(cornerRadius: 10)
+                               .fill(Color.white.opacity(0.95))
+                       )
+                       .padding(.top, 16)
+                       Spacer()
+                   }
+                
                 HStack {
                     Spacer()
                     VStack(spacing: 16) {
