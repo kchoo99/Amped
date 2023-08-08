@@ -8,6 +8,16 @@
 import SwiftUI
 import MapKit
 import CoreLocation
+import FirebaseCore
+import PartialSheet
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+  func application(_ application: UIApplication,
+                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+    FirebaseApp.configure()
+    return true
+  }
+}
 
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private var locationManager = CLLocationManager()
@@ -26,16 +36,33 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
 }
 
 struct ContentView: View {
+    @State private var ebikeOnlyCount: Int = 0
+    @State private var emptyCount: Int = 0
+    @State private var lastUpdateTime: Date? = nil
     @State private var initialRegionSet = false
     @StateObject private var locationManager = LocationManager()
     
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 40.7831, longitude: -73.9712),
-        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+        span: MKCoordinateSpan(latitudeDelta: 0.03, longitudeDelta: 0.03)
     )
     
     @State private var annotations: [StationAnnotation] = []
     @State private var isLoading: Bool = false
+    @State private var dataRefreshTimer: Timer? = nil
+    @State private var isSettingsSheetVisible: Bool = false
+    @State private var optionOneEnabled: Bool = false
+    @State private var optionTwoEnabled: Bool = false
+    
+    var lastUpdateTimeString: String {
+        guard let lastUpdate = lastUpdateTime else { return "00:00" }
+        
+        let formatter = DateFormatter()
+        formatter.timeStyle = .medium
+        return formatter.string(from: lastUpdate)
+    }
+    
+    
     
     var body: some View {
         ZStack {
@@ -47,7 +74,11 @@ struct ContentView: View {
                     return MapPin(coordinate: stationAnnotation.coordinate, tint: .blue)
                 }
             }
-            .onAppear(perform: loadData)
+            .onAppear(perform: {
+                loadData()
+                setupDataRefreshTimer()
+            })
+            .onDisappear(perform: invalidateDataRefreshTimer)
             .edgesIgnoringSafeArea(.all)
             
             if isLoading {
@@ -60,7 +91,8 @@ struct ContentView: View {
                     Text("Loading...")
                 }
                 .padding()
-                .background(Color.white.opacity(0.8))
+                .foregroundColor(Color.black)
+                .background(Color.white.opacity(1.0))
                 .cornerRadius(10)
             }
             
@@ -79,32 +111,12 @@ struct ContentView: View {
                     .frame(width: 50, height: 50)
                     .background(
                         RoundedRectangle(cornerRadius: 10)
-                            .fill(Color.white)
+                            .fill(Color.white.opacity(0.95))
                     )
                     .padding(.leading, 16)
-//                    .padding(.top, 16)
                     
-                    Spacer() // This pushes the logo to the center
+                    Spacer()
 
-//                    // Amped Logo
-//                    HStack(spacing: 8) {
-//                        Text("Amped")
-//                            .font(.largeTitle)
-//                            .bold()
-//                            .foregroundColor(Color(red: 38/255, green: 52/255, blue: 113/255))
-//
-//                        Image(systemName: "bolt.fill")
-//                            .font(.system(size: 30))
-//                            .foregroundColor(Color(red: 235/255, green: 31/255, blue: 42/255))
-//                    }
-//                    .padding(.vertical, 4)
-//                    .padding(.horizontal, 30)
-//                    .background(
-//                        RoundedRectangle(cornerRadius: 10)
-//                            .fill(Color.white.opacity(0.8))
-//                    )
-                    
-//                    Spacer() // Keeps empty space after the logo
                     Image(systemName: "bolt.fill")
                         .font(.system(size: 30))
                         .foregroundColor(Color(red: 235/255, green: 31/255, blue: 42/255))
@@ -121,7 +133,7 @@ struct ContentView: View {
                                 Circle()
                                     .fill(Color.blue)
                                     .frame(width: 20, height: 20)
-                                Text("E-bikes Only")
+                                Text("Ebikes Only: \(ebikeOnlyCount)")
                                     .font(.footnote)
                                     .foregroundColor(Color.black)
                             }
@@ -129,16 +141,19 @@ struct ContentView: View {
                                 Circle()
                                     .fill(Color.red)
                                     .frame(width: 20, height: 20)
-                                Text("Empty Only")
+                                Text("Empty Docks: \(emptyCount)")
                                     .font(.footnote)
                                     .foregroundColor(Color.black)
                             }
+                        Text("Last updated: \(lastUpdateTimeString)")
+                            .font(.footnote)
+                            .foregroundColor(Color(.darkGray))
                         }
                     .padding(.vertical, 5)
                     .padding(.horizontal, 5)
                     .background(
                                             RoundedRectangle(cornerRadius: 10)
-                                                .fill(Color.white.opacity(0.8))
+                                                .fill(Color.white.opacity(0.95))
                                         )
                         .padding(.leading, 16)
                     
@@ -151,7 +166,7 @@ struct ContentView: View {
                         }) {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color.white)
+                                    .fill(Color.white.opacity(0.95))
                                     .frame(width: 50, height: 50) // Square frame
                                 
                                 Image(systemName: "location")
@@ -163,10 +178,11 @@ struct ContentView: View {
                         }
                         .buttonStyle(PlainButtonStyle())
                         Button(action: {
+                            isSettingsSheetVisible = true
                         }) {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color.white)
+                                    .fill(Color.white.opacity(0.95))
                                     .frame(width: 50, height: 50) // Square frame
                                 
                                 Image(systemName: "slider.horizontal.3")
@@ -190,27 +206,61 @@ struct ContentView: View {
                 initialRegionSet = true
             }
         }
+        .partialSheet(isPresented: $isSettingsSheetVisible) {
+            VStack {
+                            Text("Settings")
+                                .font(.headline)
+                                .padding(.top)
+            
+                            Toggle("Option 1", isOn: $optionOneEnabled)
+                                .padding()
+            
+                            Toggle("Option 2", isOn: $optionTwoEnabled)
+                                .padding()
+            
+                        }
+                        .padding(.horizontal)
+             }
     }
     
-    func loadData() {
-        isLoading = true
-        let api = CitibikeAPI()
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 20) {
-            isLoading = false
+    func setupDataRefreshTimer() {
+        dataRefreshTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { _ in
+            // Fetch the data silently
+            loadData(silently: true)
+        }
+    }
+
+    func invalidateDataRefreshTimer() {
+        dataRefreshTimer?.invalidate()
+        dataRefreshTimer = nil
+    }
+    
+    func loadData(silently: Bool = false) {
+        print("Loading data")
+        if !silently {
+            isLoading = true
         }
         
+        let api = CitibikeAPI()
+        
         api.fetchStations { stations in
-            isLoading = false
+            if !silently {
+                isLoading = false
+            }
+            
             let categories = api.categorizeStations(stations: stations)
             
             annotations = categories.emptyStations.map { StationAnnotation(coordinate: $0.location.toCLLocationCoordinate2D(), type: .empty) }
             + categories.ebikeOnlyStations.map { StationAnnotation(coordinate: $0.location.toCLLocationCoordinate2D(), type: .ebikeOnly) }
+            
+            ebikeOnlyCount = categories.ebikeOnlyStations.count
+            emptyCount = categories.emptyStations.count
+            self.lastUpdateTime = Date()
         }
         
-        if let userLocation = locationManager.location {
-            updateRegion(to: userLocation.coordinate)
-        }
+//        if let userLocation = locationManager.location {
+//            updateRegion(to: userLocation.coordinate)
+//        }
     }
     
     func updateRegion(to coordinate: CLLocationCoordinate2D) {
@@ -238,6 +288,7 @@ extension Station.Location {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView().attachPartialSheetToRoot()
     }
+    
 }

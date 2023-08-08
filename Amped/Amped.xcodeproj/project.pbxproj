@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		CC136F2C2A82D5A800763CE1 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CC136F2B2A82D5A800763CE1 /* Launch Screen.storyboard */; };
+		CC136F2E2A82E5E300763CE1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = CC136F2D2A82E5E300763CE1 /* GoogleService-Info.plist */; };
+		CC136F312A82E64200763CE1 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = CC136F302A82E64200763CE1 /* FirebaseAnalytics */; };
+		CC136F332A82E64200763CE1 /* FirebaseAnalyticsSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CC136F322A82E64200763CE1 /* FirebaseAnalyticsSwift */; };
+		CC136F362A82E74900763CE1 /* PartialSheet in Frameworks */ = {isa = PBXBuildFile; productRef = CC136F352A82E74900763CE1 /* PartialSheet */; };
 		CC97CD852A81F9C6008227D4 /* AmpedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC97CD842A81F9C6008227D4 /* AmpedApp.swift */; };
 		CC97CD872A81F9C6008227D4 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC97CD862A81F9C6008227D4 /* ContentView.swift */; };
 		CC97CD892A81F9C7008227D4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CC97CD882A81F9C7008227D4 /* Assets.xcassets */; };
@@ -17,6 +21,7 @@
 
 /* Begin PBXFileReference section */
 		CC136F2B2A82D5A800763CE1 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		CC136F2D2A82E5E300763CE1 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		CC97CD812A81F9C6008227D4 /* Amped.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Amped.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC97CD842A81F9C6008227D4 /* AmpedApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmpedApp.swift; sourceTree = "<group>"; };
 		CC97CD862A81F9C6008227D4 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -30,6 +35,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC136F362A82E74900763CE1 /* PartialSheet in Frameworks */,
+				CC136F332A82E64200763CE1 /* FirebaseAnalyticsSwift in Frameworks */,
+				CC136F312A82E64200763CE1 /* FirebaseAnalytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -60,6 +68,7 @@
 				CC136F2B2A82D5A800763CE1 /* Launch Screen.storyboard */,
 				CC97CD882A81F9C7008227D4 /* Assets.xcassets */,
 				CC97CD922A820144008227D4 /* CitibikeAPIManager.swift */,
+				CC136F2D2A82E5E300763CE1 /* GoogleService-Info.plist */,
 				CC97CD8A2A81F9C7008227D4 /* Preview Content */,
 			);
 			path = Amped;
@@ -89,6 +98,11 @@
 			dependencies = (
 			);
 			name = Amped;
+			packageProductDependencies = (
+				CC136F302A82E64200763CE1 /* FirebaseAnalytics */,
+				CC136F322A82E64200763CE1 /* FirebaseAnalyticsSwift */,
+				CC136F352A82E74900763CE1 /* PartialSheet */,
+			);
 			productName = Amped;
 			productReference = CC97CD812A81F9C6008227D4 /* Amped.app */;
 			productType = "com.apple.product-type.application";
@@ -117,6 +131,10 @@
 				Base,
 			);
 			mainGroup = CC97CD782A81F9C6008227D4;
+			packageReferences = (
+				CC136F2F2A82E64200763CE1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				CC136F342A82E74900763CE1 /* XCRemoteSwiftPackageReference "PartialSheet" */,
+			);
 			productRefGroup = CC97CD822A81F9C6008227D4 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -132,6 +150,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CC136F2C2A82D5A800763CE1 /* Launch Screen.storyboard in Resources */,
+				CC136F2E2A82E5E300763CE1 /* GoogleService-Info.plist in Resources */,
 				CC97CD8C2A81F9C7008227D4 /* Preview Assets.xcassets in Resources */,
 				CC97CD892A81F9C7008227D4 /* Assets.xcassets in Resources */,
 			);
@@ -287,7 +306,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen.storyboard";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -322,7 +341,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen.storyboard";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -359,6 +378,43 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CC136F2F2A82E64200763CE1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 10.0.0;
+			};
+		};
+		CC136F342A82E74900763CE1 /* XCRemoteSwiftPackageReference "PartialSheet" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AndreaMiotto/PartialSheet.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CC136F302A82E64200763CE1 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC136F2F2A82E64200763CE1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		CC136F322A82E64200763CE1 /* FirebaseAnalyticsSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC136F2F2A82E64200763CE1 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsSwift;
+		};
+		CC136F352A82E74900763CE1 /* PartialSheet */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC136F342A82E74900763CE1 /* XCRemoteSwiftPackageReference "PartialSheet" */;
+			productName = PartialSheet;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CC97CD792A81F9C6008227D4 /* Project object */;
 }

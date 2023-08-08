@@ -11,7 +11,7 @@ import SwiftUI
 struct AmpedApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView().attachPartialSheetToRoot()
         }
     }
 }
