@@ -41,6 +41,7 @@ struct ContentView: View {
     @State private var lastUpdateTime: Date? = nil
     @State private var initialRegionSet = false
     @StateObject private var locationManager = LocationManager()
+    @StateObject private var locationViewModel = LocationViewModel()
     
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 40.7831, longitude: -73.9712),
@@ -51,8 +52,11 @@ struct ContentView: View {
     @State private var isLoading: Bool = false
     @State private var dataRefreshTimer: Timer? = nil
     @State private var isSettingsSheetVisible: Bool = false
-    @State private var optionOneEnabled: Bool = false
-    @State private var optionTwoEnabled: Bool = false
+    @State private var showEmptyStations: Bool = true
+    @State private var isStationSheetVisible: Bool = false
+    @State private var currentStation: Station = Station(stationId: "Null", stationName: "Null", location: Station.Location(lat: 40.7831, lng: -73.9712), totalBikesAvailable: 0, ebikesAvailable: 0, isOffline: true)
+    @State private var walkingTime: TimeInterval? = nil
+    @State private var isInfoSheetVisible: Bool = false
     
     var lastUpdateTimeString: String {
         guard let lastUpdate = lastUpdateTime else { return "00:00" }
@@ -66,13 +70,20 @@ struct ContentView: View {
     
     var body: some View {
         ZStack {
-            Map(coordinateRegion: $region, showsUserLocation: true, annotationItems: annotations) { stationAnnotation -> MapPin in
-                switch stationAnnotation.type {
-                case .empty:
-                    return MapPin(coordinate: stationAnnotation.coordinate, tint: .red)
-                case .ebikeOnly:
-                    return MapPin(coordinate: stationAnnotation.coordinate, tint: .blue)
+            Map(coordinateRegion: $region, showsUserLocation: true, annotationItems: annotations) { stationAnnotation -> MapAnnotation in
+                MapAnnotation(coordinate: stationAnnotation.coordinate){
+                    if(stationAnnotation.station.ebikesAvailable > 0 || (showEmptyStations && stationAnnotation.station.ebikesAvailable == 0)) {
+                        Button(action: {currentStation = stationAnnotation.station; calculateWalkingTime(); isStationSheetVisible = true}) {
+                            PinIcon(numEbikesAvailable: stationAnnotation.station.ebikesAvailable)
+                        }
+                    }
                 }
+//                switch stationAnnotation.type {
+//                case .empty:
+//                    return MapPin(coordinate: stationAnnotation.coordinate, tint: .red)
+//                case .ebikeOnly:
+//                    return MapPin(coordinate: stationAnnotation.coordinate, tint: .blue)
+//                }
             }
             .onAppear(perform: {
                 loadData()
@@ -116,18 +127,19 @@ struct ContentView: View {
                     .padding(.leading, 16)
                     
                     Spacer()
-
-                    Image(systemName: "bolt.fill")
-                        .font(.system(size: 30))
-                        .foregroundColor(Color(red: 235/255, green: 31/255, blue: 42/255))
-                        .padding(.trailing, 16)
+                    Button(action: { isInfoSheetVisible = true }) {
+                        Image(systemName: "bolt.fill")
+                            .font(.system(size: 30))
+                            .foregroundColor(Color(red: 235/255, green: 31/255, blue: 42/255))
+                            .padding(.trailing, 16)
+                    }
                     
                 }
                 .padding(.top, 16)
                 
                 Spacer()
                 
-                HStack {
+                HStack(alignment: .bottom) {
                     VStack(alignment: .leading, spacing: 8) {
                             HStack(spacing: 8) {
                                 Circle()
@@ -206,21 +218,103 @@ struct ContentView: View {
                 initialRegionSet = true
             }
         }
+        .partialSheet(isPresented: $isInfoSheetVisible) {
+            VStack {
+                Text("""
+Ebikes are typically 17 cents/min. Non-ebikes are free for members, up to 45 mins. After that, the pricing is 17 cents/min for all bikes. However, if there are only ebikes at a station, they are free for members (like a non-ebike would be). Furthermore, if you park the bike within the 45 mins at an empty station and rescan it, you can get another free 45mins.\n\nWe built this app to help you find empty stations and ones with only ebikes. If you have any suggestions, feel free to reach out to us.
+""")
+                
+                    .font(.body)
+                    .fontWeight(.regular)
+                HStack {
+                    Text("- ")
+                    Link("Vlad", destination: URL(string: "https://twitter.com/0x07b5")!)
+                    Text("&")
+                    Link("Kevin", destination: URL(string: "https://www.linkedin.com/in/kevin-choo-989135147/")!)
+                }
+            }
+            .padding()
+        }
         .partialSheet(isPresented: $isSettingsSheetVisible) {
             VStack {
                             Text("Settings")
                                 .font(.headline)
                                 .padding(.top)
             
-                            Toggle("Option 1", isOn: $optionOneEnabled)
-                                .padding()
-            
-                            Toggle("Option 2", isOn: $optionTwoEnabled)
+                            Toggle("Show Empty Stations", isOn: $showEmptyStations)
                                 .padding()
             
                         }
                         .padding(.horizontal)
              }
+        .partialSheet(isPresented: $isStationSheetVisible) {
+            VStack {
+                Text(currentStation.stationName)
+                    .fontWeight(.bold)
+                    .font(.title)
+                    .padding(.top)
+                HStack {
+                    VStack {
+                        HStack {
+                            Image(systemName: "bicycle")
+                                .font(.title)
+                            Text(String(currentStation.ebikesAvailable))
+                                .font(.title)
+                        }
+                        Text("ebikes")
+                            .font(.caption)
+                    }
+                    Divider()
+                        .frame(width: 4)
+                        .frame(height: 50)
+                        .padding()
+                    VStack {
+                        HStack {
+                            Image(systemName: "figure.walk")
+                                .font(.title)
+                            Text(walkingTime.map { formatTime(TimeInterval($0))}  ?? "unknown")
+                                .font(.title)
+                        }
+                        Text("minutes")
+                            .font(.caption)
+                    }
+                }
+                Button("Get Directions") {
+                    openDirections()
+                }
+                .buttonStyle(DirectionsButton())
+            }
+        }
+    }
+    
+    struct DirectionsButton: ButtonStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .padding()
+                .background(.blue)
+                .foregroundStyle(.white)
+                .clipShape(Rectangle())
+                .scaleEffect(configuration.isPressed ? 1.1 : 1)
+        }
+    }
+    
+    private func openDirections() {
+        let destinationPlacemark = MKPlacemark(coordinate: CLLocationCoordinate2D(latitude: currentStation.location.lat, longitude: currentStation.location.lng))
+        let destinationItem = MKMapItem(placemark: destinationPlacemark)
+                
+        destinationItem.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking])
+    }
+    
+    private func calculateWalkingTime() {
+        locationViewModel.calculateWalkingTime(to: CLLocationCoordinate2D(latitude: currentStation.location.lat, longitude: currentStation.location.lng)) { time in
+            walkingTime = time
+        }
+    }
+    private func formatTime(_ time: TimeInterval) -> String {
+        let formatter = DateComponentsFormatter()
+        formatter.unitsStyle = .positional
+        formatter.allowedUnits = [.minute]
+        return formatter.string(from: time) ?? ""
     }
     
     func setupDataRefreshTimer() {
@@ -237,35 +331,112 @@ struct ContentView: View {
     
     func loadData(silently: Bool = false) {
         print("Loading data")
-        if !silently {
-            isLoading = true
-        }
         
-        let api = CitibikeAPI()
-        
-        api.fetchStations { stations in
+        DispatchQueue.global().async { // Perform the task on a background thread
+            
             if !silently {
-                isLoading = false
+                DispatchQueue.main.async {
+                    isLoading = true
+                }
             }
             
-            let categories = api.categorizeStations(stations: stations)
+            let api = CitibikeAPI()
             
-            annotations = categories.emptyStations.map { StationAnnotation(coordinate: $0.location.toCLLocationCoordinate2D(), type: .empty, station: $0) }
-            + categories.ebikeOnlyStations.map { StationAnnotation(coordinate: $0.location.toCLLocationCoordinate2D(), type: .ebikeOnly, station: $0) }
-            
-            ebikeOnlyCount = categories.ebikeOnlyStations.count
-            emptyCount = categories.emptyStations.count
-            self.lastUpdateTime = Date()
+            api.fetchStations { stations in
+                
+                let categories = api.categorizeStations(stations: stations)
+                
+                let annotationsToAdd = categories.emptyStations.map { StationAnnotation(coordinate: $0.location.toCLLocationCoordinate2D(), type: .empty, station: $0) }
+                + categories.ebikeOnlyStations.map { StationAnnotation(coordinate: $0.location.toCLLocationCoordinate2D(), type: .ebikeOnly, station: $0)  }
+                
+                DispatchQueue.main.async { // Switching to main thread for UI updates
+                    if !silently {
+                        isLoading = false
+                    }
+                    
+                    annotations = annotationsToAdd
+                    ebikeOnlyCount = categories.ebikeOnlyStations.count
+                    emptyCount = categories.emptyStations.count
+                    self.lastUpdateTime = Date()
+                    
+                    // Uncomment if you need this:
+                    // if let userLocation = locationManager.location {
+                    //     updateRegion(to: userLocation.coordinate)
+                    // }
+                }
+            }
         }
-        
-//        if let userLocation = locationManager.location {
-//            updateRegion(to: userLocation.coordinate)
-//        }
     }
+
     
     func updateRegion(to coordinate: CLLocationCoordinate2D) {
         region.center = coordinate
         region.span = MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+    }
+}
+
+class LocationViewModel: ObservableObject {
+    private var locationManager = CLLocationManager()
+        
+    func calculateWalkingTime(to destinationCoordinate: CLLocationCoordinate2D, completion: @escaping (TimeInterval?) -> Void) {
+            guard let userLocation = locationManager.location else {
+                completion(nil)
+                return
+            }
+            
+            let destinationPlacemark = MKPlacemark(coordinate: destinationCoordinate)
+            let destinationItem = MKMapItem(placemark: destinationPlacemark)
+            
+            let request = MKDirections.Request()
+            request.source = MKMapItem(placemark: MKPlacemark(coordinate: userLocation.coordinate))
+            request.destination = destinationItem
+            request.transportType = .walking
+            
+            let directions = MKDirections(request: request)
+            directions.calculate { response, error in
+                guard let route = response?.routes.first else {
+                    completion(nil)
+                    return
+                }
+                
+                completion(route.expectedTravelTime)
+            }
+        }
+}
+
+struct PinIcon: View {
+    var numEbikesAvailable: Int
+    
+    var body: some View {
+        if(numEbikesAvailable == 0){
+                VStack(spacing: 0){
+                    ZStack {
+                        Image(systemName: "circle.fill")
+                            .font(.title)
+                            .foregroundColor(.red)
+                        Text("0")
+                            .foregroundColor(.white)
+                    }
+                    Image(systemName: "arrowtriangle.down.fill")
+                        .font(.caption)
+                        .foregroundColor(.red)
+                        .offset(x: 0, y: -5)
+                }
+        } else {
+            VStack(spacing: 0) {
+                ZStack {
+                    Image(systemName: "circle.fill")
+                        .font(.title)
+                        .foregroundColor(.blue)
+                    Text(String(numEbikesAvailable))
+                        .foregroundColor(.white)
+                }
+                Image(systemName: "arrowtriangle.down.fill")
+                    .font(.caption)
+                    .foregroundColor(.blue)
+                    .offset(x: 0, y: -5)
+            }
+        }
     }
 }
 
