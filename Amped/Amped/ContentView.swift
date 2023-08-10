@@ -250,8 +250,8 @@ struct ContentView: View {
             
             let categories = api.categorizeStations(stations: stations)
             
-            annotations = categories.emptyStations.map { StationAnnotation(coordinate: $0.location.toCLLocationCoordinate2D(), type: .empty) }
-            + categories.ebikeOnlyStations.map { StationAnnotation(coordinate: $0.location.toCLLocationCoordinate2D(), type: .ebikeOnly) }
+            annotations = categories.emptyStations.map { StationAnnotation(coordinate: $0.location.toCLLocationCoordinate2D(), type: .empty, station: $0) }
+            + categories.ebikeOnlyStations.map { StationAnnotation(coordinate: $0.location.toCLLocationCoordinate2D(), type: .ebikeOnly, station: $0) }
             
             ebikeOnlyCount = categories.ebikeOnlyStations.count
             emptyCount = categories.emptyStations.count
@@ -273,6 +273,7 @@ struct StationAnnotation: Identifiable {
     var id = UUID()
     var coordinate: CLLocationCoordinate2D
     var type: StationType
+    var station: Station
     
     enum StationType {
         case empty
