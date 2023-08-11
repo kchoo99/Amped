@@ -221,7 +221,7 @@ struct ContentView: View {
         .partialSheet(isPresented: $isInfoSheetVisible) {
             VStack {
                 Text("""
-Ebikes are typically 17 cents/min. Non-ebikes are free for members, up to 45 mins. After that, the pricing is 17 cents/min for all bikes. However, if there are only ebikes at a station, they are free for members (like a non-ebike would be). Furthermore, if you park the bike within the 45 mins at an empty station and rescan it, you can get another free 45mins.\n\nWe built this app to help you find empty stations and ones with only ebikes. If you have any suggestions, feel free to reach out to us.
+Ebikes are typically 17 cents/min. Non-ebikes are free for members, up to 45 mins. After that, the pricing is 17 cents/min for all bikes. However, if there are only ebikes at a station, they are free for members (like a non-ebike would be). Furthermore, if you park the bike within the 45 mins at an empty station and rescan it, you can get another free 45mins.\n\nWe built this app to help you find empty stations and ones with only ebikes. If you have any suggestions, feel free to reach out to us.\n
 """)
                 
                     .font(.body)
